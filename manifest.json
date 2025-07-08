@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "PhishGuard Auto Detector",
+  "version": "1.0",
+  "description": "AI-based phishing URL blocker",
+  "permissions": ["tabs", "scripting", "webNavigation"],
+  "host_permissions": [
+    "<all_urls>",
+    "http://127.0.0.1:8000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": "icon.png",
+    "default_popup": "pop.html"
+
+  }
+}
