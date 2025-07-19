@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "PhishGuard Auto Detector",
   "version": "1.0",
-  "description": "AI-based phishing URL blocker",
+  "description": "Detects phishing websites using a cloud-based ML model before they load.",
   "permissions": ["tabs", "scripting", "webNavigation"],
   "host_permissions": [
     "<all_urls>",
@@ -13,6 +13,7 @@
   },
   "action": {
     "default_icon": "icon.png",
+    "default_title": "PhishGuard",
     "default_popup": "pop.html"
 
   }

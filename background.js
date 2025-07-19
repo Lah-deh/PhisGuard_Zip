@@ -10,7 +10,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     }
 
     try {
-      const response = await fetch("https://phishguard-api-0nyx.onrender.com/predict", {
+      const response = await fetch("https://phishguard-api-0nyx.onrender.com", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: tab.url })
@@ -30,14 +30,17 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 });
 
-// ✅ Listen for proceed messages from warning page
+// Handle "Allow Anyway"
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "allow_url" && message.url) {
-    allowedUrls.push(message.url);
-
-    // Proceed to original URL
-    chrome.tabs.update(sender.tab.id, {
-      url: message.url
-    });
+  if (message.action === "allowUrl" && message.tabId !== undefined && message.url) {
+    allowedUrlsPerTab[message.tabId] = message.url;
+    checkedUrlsPerTab[message.tabId] = message.url; // prevent future checks too
+    sendResponse({ status: "ok" });
   }
+});
+
+// Clear stored data when tab closes
+chrome.tabs.onRemoved.addListener((tabId) => {
+  delete allowedUrlsPerTab[tabId];
+  delete checkedUrlsPerTab[tabId];
 });
