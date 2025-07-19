@@ -10,6 +10,8 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     }
 
     try {
+      console.log("Sending request to PhishGuard API for URL:", tab.url);
+
       const response = await fetch("https://phishguard-api-0nyx.onrender.com", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -18,29 +20,36 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
       const data = await response.json();
 
-      if (data.prediction === 1) {
+      // ✅ Redirect only if phishing
+      if (data.prediction === "Phishing") {
         chrome.tabs.update(tabId, {
-          url: chrome.runtime.getURL(`warning.html?url=${encodeURIComponent(tab.url)}&confidence=${data.confidence}`)
+          url: chrome.runtime.getURL(
+            `warning.html?url=${encodeURIComponent(tab.url)}&confidence=${Number(data.confidence).toFixed(2)}`
+          )
+        });
+      } else {
+        chrome.scripting.executeScript({
+          target: { tabId },
+          func: () => {
+            alert("✅ This site is safe. Proceed with confidence!");
+          }
         });
       }
 
+      console.log("PhishGuard API response:", data);
+
+
     } catch (err) {
-      console.error("PhishGuard background error:", err.message);
+      console.error("PhishGuard background error:", err);
     }
   }
 });
 
-// Handle "Allow Anyway"
+// ✅ Handle "Allow Anyway"
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "allowUrl" && message.tabId !== undefined && message.url) {
-    allowedUrlsPerTab[message.tabId] = message.url;
-    checkedUrlsPerTab[message.tabId] = message.url; // prevent future checks too
+  if (message.action === "allowUrl" && message.url) {
+    allowedUrls.push(message.url);
+    console.log("URL added to allowlist:", message.url);
     sendResponse({ status: "ok" });
   }
-});
-
-// Clear stored data when tab closes
-chrome.tabs.onRemoved.addListener((tabId) => {
-  delete allowedUrlsPerTab[tabId];
-  delete checkedUrlsPerTab[tabId];
 });

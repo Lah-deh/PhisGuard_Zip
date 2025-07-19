@@ -13,8 +13,9 @@ window.onload = () => {
   }
 
   if (confidenceDisplay && confidence) {
-    confidenceDisplay.innerText = `Confidence Level: ${Math.round(confidence * 100)}%`;
-  }
+  confidenceDisplay.innerText = `Confidence Level: ${confidence}%`;
+}
+
 
   if (backBtn) {
     backBtn.addEventListener("click", () => {
@@ -22,9 +23,11 @@ window.onload = () => {
     });
   }
 
-  if (proceedBtn) {
-    proceedBtn.addEventListener("click", () => {
-      chrome.runtime.sendMessage({ action: "allow_url", url: url });
-    });
-  }
+  proceedBtn.addEventListener("click", () => {
+  chrome.runtime.sendMessage({ action: "allowUrl", url: url }, () => {
+    // After allowing, redirect to original URL
+    window.location.href = url;
+  });
+});
+
 };

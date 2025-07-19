@@ -3,10 +3,16 @@
   "name": "PhishGuard Auto Detector",
   "version": "1.0",
   "description": "Detects phishing websites using a cloud-based ML model before they load.",
-  "permissions": ["tabs", "scripting", "webNavigation"],
+  "permissions": [
+    "tabs",
+    "scripting",
+    "activeTab",
+    "webNavigation",
+    "storage"
+  ],
   "host_permissions": [
     "<all_urls>",
-    "http://127.0.0.1:8000/*"
+    "https://phishguard-api-0nyx.onrender.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -15,6 +21,13 @@
     "default_icon": "icon.png",
     "default_title": "PhishGuard",
     "default_popup": "pop.html"
-
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
   }
 }
