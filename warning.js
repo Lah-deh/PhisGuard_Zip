@@ -1,33 +1,40 @@
-window.onload = () => {
+// warning.js
+document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
-  const url = params.get("url");
-  const confidence = params.get("confidence");
+  const siteUrl = params.get('url') || '';
+  const tabId = parseInt(params.get('tabId'), 10);
+  const severity = params.get('severity') || '';
+  const confidence = params.get('confidence') || '';
 
-  const urlDisplay = document.getElementById("urlDisplay");
-  const confidenceDisplay = document.getElementById("confidenceDisplay");
-  const backBtn = document.getElementById("backBtn");
-  const proceedBtn = document.getElementById("proceed-btn");
+  // Fill in details
+  document.getElementById('site-url').textContent = siteUrl;
+  document.getElementById('threat-level').textContent = severity;
+  document.getElementById('confidence-level').textContent = confidence;
 
-  if (urlDisplay) {
-    urlDisplay.innerText = url;
-  }
+  // Set color class for severity
+  const threatEl = document.getElementById('threat-level');
+  if (severity.toLowerCase() === 'high') threatEl.classList.add('high');
+  if (severity.toLowerCase() === 'medium') threatEl.classList.add('medium');
+  if (severity.toLowerCase() === 'low') threatEl.classList.add('low');
 
-  if (confidenceDisplay && confidence) {
-  confidenceDisplay.innerText = `Confidence Level: ${confidence}%`;
-}
+  // Visit Anyway button
+  document.getElementById('proceed-btn').addEventListener('click', () => {
+    chrome.runtime.sendMessage(
+      { action: 'allowUrl', tabId: tabId, url: siteUrl },
+      (response) => {
+        if (chrome.runtime.lastError) {
+          console.error('Error sending allowUrl:', chrome.runtime.lastError);
+          return;
+        }
+        if (response && response.status === 'ok') {
+          chrome.tabs.update(tabId, { url: siteUrl });
+        }
+      }
+    );
+  });
 
-
-  if (backBtn) {
-    backBtn.addEventListener("click", () => {
-      window.history.back();
-    });
-  }
-
-  proceedBtn.addEventListener("click", () => {
-  chrome.runtime.sendMessage({ action: "allowUrl", url: url }, () => {
-    // After allowing, redirect to original URL
-    window.location.href = url;
+  // Close Tab button
+  document.getElementById('close-btn').addEventListener('click', () => {
+    chrome.tabs.remove(tabId);
   });
 });
-
-};
