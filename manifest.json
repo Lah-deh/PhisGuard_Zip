@@ -5,6 +5,7 @@
   "description": "Detects phishing websites before they load, showing a blank page until verified.",
   "permissions": [
     "tabs",
+    "activeTab",
     "scripting",
     "webNavigation"
   ],
